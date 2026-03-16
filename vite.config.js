@@ -8,6 +8,13 @@ import http from 'http';
 
 const execFileAsync = promisify(execFile);
 
+function getTdLPPath() {
+    const binDir = resolve('bin');
+    const isWin = process.platform === 'win32';
+    const localPath = resolve(binDir, isWin ? 'yt-dlp.exe' : 'yt-dlp');
+    return existsSync(localPath) ? localPath : 'yt-dlp';
+}
+
 export default defineConfig({
     publicDir: 'public',
     server: {
@@ -21,6 +28,7 @@ export default defineConfig({
             configureServer(server) {
                 server.middlewares.use('/yt-api', async (req, res) => {
                     const url = new URL(req.url, 'http://localhost');
+                    const ytdlp = getTdLPPath();
 
                     if (url.pathname.startsWith('/search')) {
                         res.setHeader('Content-Type', 'application/json');
@@ -30,7 +38,7 @@ export default defineConfig({
                             return;
                         }
                         try {
-                            const { stdout } = await execFileAsync('yt-dlp', [
+                            const { stdout } = await execFileAsync(ytdlp, [
                                 `ytsearch10:${query}`,
                                 '--flat-playlist',
                                 '-j',
@@ -53,7 +61,7 @@ export default defineConfig({
                             return;
                         }
                         try {
-                            const { stdout } = await execFileAsync('yt-dlp', [
+                            const { stdout } = await execFileAsync(ytdlp, [
                                 '-f', 'bestaudio',
                                 '-j',
                                 '--no-warnings',

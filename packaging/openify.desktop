@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Openify
+Comment=Modern Music Player
+Exec=openify
+Icon=openify
+Terminal=true
+Type=Application
+Categories=AudioVideo;Audio;Player;
+Keywords=Music;Player;Streaming;YouTube;

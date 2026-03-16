@@ -1,0 +1,46 @@
+# Maintainer: Your Name <your.email@example.com>
+pkgname=openify-git
+pkgver=2.0.0.r0.g769f4de
+pkgrel=1
+pkgdesc="A modern, extensible music player that runs entirely in the browser."
+arch=('any')
+url="https://github.com/Arcioth/openify"
+license=('ISC')
+depends=('nodejs>=18' 'npm' 'yt-dlp')
+makedepends=('git')
+provides=('openify')
+conflicts=('openify')
+source=('git+https://github.com/Arcioth/openify.git'
+        'openify.desktop')
+sha256sums=('SKIP'
+            'SKIP')
+
+pkgver() {
+  cd "$srcdir/openify"
+  git describe --long --tags | sed 's/\([^-]*-g\)/r\1/;s/-/./g'
+}
+
+build() {
+  cd "$srcdir/openify"
+  npm install
+  npm run build
+}
+
+package() {
+  cd "$srcdir/openify"
+  
+  # Install application files
+  install -d "$pkgdir/usr/lib/openify"
+  cp -r . "$pkgdir/usr/lib/openify"
+  
+  # Install binary launcher
+  install -d "$pkgdir/usr/bin"
+  echo -e "#!/bin/bash\ncd /usr/lib/openify && npm run dev" > "$pkgdir/usr/bin/openify"
+  chmod +x "$pkgdir/usr/bin/openify"
+  
+  # Install desktop entry
+  install -Dm644 "$srcdir/openify.desktop" "$pkgdir/usr/share/applications/openify.desktop"
+  
+  # Install icon
+  install -Dm644 "public/open1.svg" "$pkgdir/usr/share/pixmaps/openify.svg"
+}

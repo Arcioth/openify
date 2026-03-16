@@ -53,20 +53,51 @@ A full-featured plugin architecture with:
 ### Prerequisites
 - [Node.js](https://nodejs.org/) (v18+)
 - [yt-dlp](https://github.com/yt-dlp/yt-dlp) (required for the YouTube Music extension)
-  - **Linux:** `sudo apt install yt-dlp` or `pip install yt-dlp`
-  - **macOS:** `brew install yt-dlp`
-  - **Windows:** `pip install yt-dlp` or download the `.exe` and add it to your PATH
 
-### Install & Run
+---
+
+### Option 1: Automatic Setup (Recommended)
+This method automatically downloads the correct `yt-dlp` binary for your OS and installs all project dependencies.
 
 ```bash
 git clone https://github.com/Arcioth/openify.git
 cd openify
-npm install
+npm run setup
 npm run dev
 ```
 
+### Option 2: Manual Setup
+If you prefer to manage your own dependencies or already have `yt-dlp` installed system-wide:
+
+1. **Clone & Install:**
+   ```bash
+   git clone https://github.com/Arcioth/openify.git
+   cd openify
+   npm install
+   ```
+
+2. **Install yt-dlp:**
+   - **Linux:** `sudo apt install yt-dlp` (or use your distro's package manager)
+   - **macOS:** `brew install yt-dlp`
+   - **Windows:** `pip install yt-dlp` or download `yt-dlp.exe` from their [releases](https://github.com/yt-dlp/yt-dlp/releases) and add it to your PATH.
+
+3. **Run:**
+   ```bash
+   npm run dev
+   ```
+
+### Arch Linux (AUR)
+If you are on Arch Linux, you can install the git version directly (includes all dependencies):
+```bash
+git clone https://aur.archlinux.org/openify-git.git
+cd openify-git
+makepkg -si
+```
+
+---
+
 Open `http://localhost:5173` in your browser, click **Load Folder**, and select a folder containing audio files.
+
 
 ### Build for Production
 

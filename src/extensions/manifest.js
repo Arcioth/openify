@@ -10,6 +10,7 @@ const VALID_PERMISSIONS = new Set([
     'ui:settingsPanel',
     'ui:playerWidget',
     'library:read',
+    'library:write',
     'storage',
     'themes:register',
     'network',

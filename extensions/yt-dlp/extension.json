@@ -1,0 +1,19 @@
+{
+    "id": "openify.yt-dlp",
+    "name": "YouTube Music",
+    "version": "1.0.0",
+    "description": "Search and play music from YouTube using Piped API (yt-dlp compatible backend).",
+    "author": "Openify Team",
+    "main": "index.js",
+    "permissions": [
+        "playback:read",
+        "playback:control",
+        "events:subscribe",
+        "library:read",
+        "library:write",
+        "ui:sidebar",
+        "ui:settingsPanel",
+        "storage",
+        "network"
+    ]
+}

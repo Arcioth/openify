@@ -1,6 +1,7 @@
 import { events } from '../events.js';
 import { state } from '../state.js';
 import * as audio from '../audio.js';
+import { addSongs, updateSong } from '../library.js';
 import { extStorageGet, extStorageSet, extStorageRemove, extStorageGetAll } from './storage.js';
 import {
     registerSidebarItem, unregisterSidebarItem,
@@ -120,6 +121,18 @@ export function createExtensionAPI(extensionId, permissions, record) {
             getActivePlaylist() {
                 return state.activePl;
             },
+        };
+    }
+
+    // --- Library Write ---
+    if (perms.has('library:write')) {
+        api.library = api.library || {};
+        api.library.addSongs = (songs) => {
+            if (!Array.isArray(songs)) songs = [songs];
+            return addSongs(songs);
+        };
+        api.library.updateSong = (idx, updates) => {
+            updateSong(idx, updates);
         };
     }
 

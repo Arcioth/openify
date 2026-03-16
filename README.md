@@ -52,6 +52,10 @@ A full-featured plugin architecture with:
 
 ### Prerequisites
 - [Node.js](https://nodejs.org/) (v18+)
+- [yt-dlp](https://github.com/yt-dlp/yt-dlp) (required for the YouTube Music extension)
+  - **Linux:** `sudo apt install yt-dlp` or `pip install yt-dlp`
+  - **macOS:** `brew install yt-dlp`
+  - **Windows:** `pip install yt-dlp` or download the `.exe` and add it to your PATH
 
 ### Install & Run
 

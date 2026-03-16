@@ -56,6 +56,7 @@ async function discoverBundledExtensions() {
         'better-visualizer',
         'better-extensions',
         'better-themes',
+        'yt-dlp',
     ];
 
     for (const name of bundledExtensions) {

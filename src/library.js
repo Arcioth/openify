@@ -3,6 +3,43 @@ import { events } from './events.js';
 import { saveToDB, getFromDB } from './db.js';
 import { format } from './audio.js';
 
+export function addSongs(newSongs) {
+    if (!state.playlists['All Songs']) {
+        state.playlists['All Songs'] = [];
+    }
+    const startIdx = state.allSongs.length;
+    const maxId = state.allSongs.length > 0
+        ? Math.max(...state.allSongs.map(s => s.id))
+        : 0;
+    newSongs.forEach((song, i) => {
+        const s = {
+            file: null,
+            folder: song.folder || 'Streaming',
+            title: song.title || 'Unknown',
+            filename: song.filename || `stream-${maxId + i + 1}`,
+            duration: song.duration || '--:--',
+            durSec: song.durSec || 0,
+            artwork: song.artwork || null,
+            assetUrl: song.assetUrl || null,
+            id: maxId + i + 1,
+        };
+        state.allSongs.push(s);
+        if (!state.playlists[s.folder]) state.playlists[s.folder] = [];
+        state.playlists[s.folder].push(s);
+        state.playlists['All Songs'].push(s);
+    });
+    events.emit('libraryLoaded');
+    return startIdx;
+}
+
+export function updateSong(idx, updates) {
+    if (idx < 0 || idx >= state.allSongs.length) return;
+    const song = state.allSongs[idx];
+    for (const key of ['assetUrl', 'title', 'artwork', 'duration', 'durSec']) {
+        if (updates[key] !== undefined) song[key] = updates[key];
+    }
+}
+
 export function loadFromFiles(files) {
     const audioFiles = Array.from(files).filter(f =>
         f.type.startsWith('audio/') || f.name.match(/\.(mp3|wav|ogg|flac|m4a)$/i)

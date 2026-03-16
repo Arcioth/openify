@@ -2,7 +2,7 @@
 Name=Openify
 Comment=Modern Music Player
 Exec=openify
-Icon=openify
+Icon=openify.png
 Terminal=true
 Type=Application
 Categories=AudioVideo;Audio;Player;

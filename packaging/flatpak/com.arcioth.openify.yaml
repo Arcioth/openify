@@ -1,0 +1,41 @@
+app-id: com.arcioth.openify
+runtime: org.freedesktop.Platform
+runtime-version: '23.08'
+sdk: org.freedesktop.Sdk
+sdk-extensions:
+  - org.freedesktop.Sdk.Extension.rust-stable
+  - org.freedesktop.Sdk.Extension.node18
+command: openify
+modules:
+  - name: yt-dlp
+    buildsystem: simple
+    build-commands:
+      - install -D yt-dlp /app/bin/yt-dlp
+    sources:
+      - type: file
+        url: https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp
+        sha256: SKIP # Replace with actual hash for production
+  - name: openify
+    buildsystem: simple
+    build-options:
+      append-path: /usr/lib/sdk/node18/bin:/usr/lib/sdk/rust-stable/bin
+    build-commands:
+      - npm install
+      - npm run tauri build -- --bundles deb
+      - install -D src-tauri/target/release/openify /app/bin/openify
+    sources:
+      - type: git
+        url: https://github.com/Arcioth/openify.git
+        branch: v2.0
+    cleanup:
+      - /include
+      - /lib/pkgconfig
+finish-args:
+  - --share=ipc
+  - --socket=fallback-x11
+  - --socket=wayland
+  - --socket=pulseaudio
+  - --share=network
+  - --filesystem=home
+  - --device=dri
+  - --talk-name=org.freedesktop.Notifications

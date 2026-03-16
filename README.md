@@ -18,9 +18,90 @@
 
 ---
 
-Openify is a privacy-first music player that reads audio files directly from your local folders. No accounts, no streaming, no servers — just your music and your browser. It ships with a powerful extension system, 25+ themes, synced lyrics, audio visualizers, and a fully customizable UI.
+Openify is a privacy-first music player that reads audio files directly from your local folders. No accounts, no streaming, no servers — just your music. It is built as a lightweight desktop application using **Tauri**, which leverages your system's native WebView for a zero-bloat experience.
+
+## Dependencies & Requirements
+
+Openify is built with **Vanilla JS** (frontend) and **Tauri** (Rust backend). 
+
+### Build Dependencies (All Platforms)
+- [Node.js](https://nodejs.org/) (v18+)
+- [Rust](https://rustup.rs/) (v1.70+)
+- [yt-dlp](https://github.com/yt-dlp/yt-dlp) (Runtime dependency for YouTube features)
+
+### Linux-Specific Build Dependencies
+- `webkit2gtk`
+- `gtk3`
+- `libappindicator-gtk3`
+- `pkg-config`
+- `build-essential` (or `base-devel`)
+
+---
+
+## Installation & Setup
+
+### Arch Linux (AUR)
+Install the git version from the AUR:
+```bash
+git clone https://aur.archlinux.org/openify-git.git
+cd openify-git
+makepkg -si
+```
+*Dependencies like `yt-dlp` and `webkit2gtk` are automatically handled.*
+
+### Flatpak
+1. Clone the repository.
+2. Build and install via Flatpak:
+```bash
+flatpak-builder --user --install --force-clean build packaging/flatpak/com.arcioth.openify.yaml
+```
+
+### Windows
+1. Install [WebView2](https://developer.microsoft.com/en-us/microsoft-edge/webview2/) (usually pre-installed on Windows 10/11).
+2. Install [Rust](https://rustup.rs/) and [Node.js](https://nodejs.org/).
+3. Clone and run:
+```bash
+npm install
+npm run tauri dev
+```
+*To build a standalone `.exe` or `.msi`: `npm run tauri build`*
+
+### macOS
+1. Install [Xcode Command Line Tools](https://developer.apple.com/xcode/resources/): `xcode-select --install`.
+2. Install [Rust](https://rustup.rs/) and [Node.js](https://nodejs.org/).
+3. Clone and run:
+```bash
+npm install
+npm run tauri dev
+```
+*To build a `.app` or `.dmg`: `npm run tauri build`*
+
+---
+
+## Development
+
+### Run in Browser (Web only)
+```bash
+npm install
+npm run dev
+```
+
+### Run as Desktop App (Recommended)
+```bash
+npm install
+npm run tauri dev
+```
+
+### Build Desktop Release
+```bash
+npm run tauri build
+```
+Binaries will be available in `src-tauri/target/release/`.
+
+---
 
 ## Features
+...
 
 ### Core Player
 - **Local file playback** — load any folder of audio files from your computer

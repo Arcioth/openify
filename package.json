@@ -19,6 +19,8 @@
   "author": "Arcioth",
   "license": "ISC",
   "devDependencies": {
+    "@tauri-apps/api": "^2.10.1",
+    "@tauri-apps/cli": "^2.10.1",
     "vite": "^7.3.1"
   }
 }

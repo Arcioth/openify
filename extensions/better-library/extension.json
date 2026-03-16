@@ -1,0 +1,18 @@
+{
+    "id": "openify.better-library",
+    "name": "Better Library",
+    "version": "1.0.0",
+    "description": "Enhanced library sidebar with artwork thumbnails, folder stats, search/filter, sort options, and recently played tracking.",
+    "author": "Openify Team",
+    "main": "index.js",
+    "permissions": [
+        "library:read",
+        "playback:read",
+        "playback:control",
+        "events:subscribe",
+        "storage"
+    ],
+    "requires": [
+        "openify.better-ui"
+    ]
+}

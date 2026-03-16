@@ -1,0 +1,19 @@
+{
+    "id": "openify.better-lyrics",
+    "name": "Better Lyrics",
+    "version": "1.0.0",
+    "description": "Enhanced lyrics: time offset adjustment, start-point control, per-track saving, and a live lyric line in the player bar.",
+    "author": "Openify Team",
+    "main": "index.js",
+    "permissions": [
+        "playback:read",
+        "playback:control",
+        "events:subscribe",
+        "ui:sidebar",
+        "ui:playerWidget",
+        "storage"
+    ],
+    "requires": [
+        "openify.lyrics"
+    ]
+}

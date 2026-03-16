@@ -1,0 +1,11 @@
+{
+    "id": "openify.compact-menu",
+    "name": "Compact Menu",
+    "version": "1.0.0",
+    "description": "Replaces the sidebar navigation with a compact icon grid to save space.",
+    "author": "Openify Team",
+    "main": "index.js",
+    "permissions": [
+        "events:subscribe"
+    ]
+}

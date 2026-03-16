@@ -1,0 +1,14 @@
+{
+    "id": "openify.visualizer",
+    "name": "Visualizer",
+    "version": "1.0.0",
+    "description": "Real-time audio visualizer with multiple modes: bars, waveform, circle, and particles.",
+    "author": "Openify Team",
+    "main": "index.js",
+    "permissions": [
+        "playback:read",
+        "events:subscribe",
+        "ui:sidebar",
+        "storage"
+    ]
+}

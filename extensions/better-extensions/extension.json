@@ -1,0 +1,12 @@
+{
+    "id": "openify.better-extensions",
+    "name": "Better Extensions",
+    "version": "1.0.0",
+    "description": "Enhanced extension manager with search, compact/normal/large view modes, and enable/disable all controls.",
+    "author": "Openify Team",
+    "main": "index.js",
+    "permissions": [
+        "events:subscribe",
+        "storage"
+    ]
+}

@@ -1,0 +1,15 @@
+{
+    "id": "openify.sample-now-playing",
+    "name": "Now Playing Info",
+    "version": "1.0.0",
+    "description": "Shows detailed info about the currently playing track with play counts.",
+    "author": "Openify Team",
+    "main": "index.js",
+    "permissions": [
+        "playback:read",
+        "events:subscribe",
+        "ui:sidebar",
+        "storage",
+        "library:read"
+    ]
+}

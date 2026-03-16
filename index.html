@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Openify - Pro Music Player</title>
+    <link rel="stylesheet" href="/fontawesome-free-6.4.0-web/css/all.min.css">
+    <link rel="stylesheet" href="/styles/main.css">
+    <script src="/jsmediatags.js"></script>
+</head>
+<body data-theme="openify">
+    <aside class="sidebar">
+        <div class="side-panel">
+            <div class="logo-container" id="logo-btn">
+                <img src="/open1.svg" class="logo-img" id="main-logo">
+                <div class="accent-color" style="font-size: 22px; font-weight: 900;">Openify</div>
+            </div>
+            <div class="nav-item active" id="nav-home" onclick="switchView('home')"><i class="fas fa-home"></i> Home</div>
+            <div class="nav-item" id="nav-settings" onclick="switchView('settings')"><i class="fas fa-cog"></i> Settings</div>
+        </div>
+        <div class="side-panel" style="flex-grow: 1;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <span style="font-weight: 700; color: var(--text-sub); font-size: 13px;"><i class="fas fa-layer-group"></i> Library</span>
+            </div>
+            <button class="btn-sync" id="btn-load-library"><i class="fas fa-folder-open"></i> Load Folder</button>
+            <input type="file" id="f-fallback" webkitdirectory directory multiple style="display:none">
+            <div id="pl-list" class="playlist-list" style="margin-top: 10px;"></div>
+        </div>
+    </aside>
+    <main class="main-content">
+        <header class="header">
+            <div class="search-container">
+                <i class="fas fa-search" style="color: #888"></i>
+                <input type="text" id="song-search" placeholder="Search tracks...">
+                <div class="search-results-overlay" id="search-results"></div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 20px;">
+                <i class="fas fa-list-ul queue-toggle" id="q-toggle-header" title="Toggle Queue" style="cursor:pointer"></i>
+                <div style="background: #333; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center;"><i class="fas fa-user" style="font-size: 14px;"></i></div>
+            </div>
+        </header>
+        <div id="view-home" class="view-section active">
+            <div class="banner">
+                <div class="banner-art" id="banner-art"><i class="fas fa-music"></i></div>
+                <div class="banner-text">
+                    <p style="font-weight: 800; text-transform: uppercase; font-size: 11px; margin-bottom: 5px;">Collection</p>
+                    <h1 id="banner-title" class="accent-color">My Music</h1>
+                    <p id="banner-meta" style="color: var(--text-sub); margin-top: 5px; font-size: 13px;">No library connected.</p>
+                </div>
+            </div>
+            <div class="controls-header">
+                <button class="view-btn" id="btn-view-compact" onclick="setViewMode('compact')" title="Compact View"><i class="fas fa-list"></i></button>
+                <button class="view-btn" id="btn-view-normal" onclick="setViewMode('normal')" title="Normal View"><i class="fas fa-th-large"></i></button>
+                <button class="view-btn" id="btn-view-big" onclick="setViewMode('big')" title="Big View"><i class="fas fa-expand-arrows-alt"></i></button>
+                <div class="recent-section" id="recent-section" style="display:none;"><div class="recent-grid" id="recent-grid"></div></div>
+            </div>
+            <div id="table-container" style="padding: 0 32px 40px 32px;">
+                <table class="song-table" id="song-table-element">
+                    <thead>
+                        <tr>
+                            <th width="40" onclick="toggleSort('id')"># <i id="sort-id" class="fas fa-sort"></i></th>
+                            <th onclick="toggleSort('title')">Title <i id="sort-title" class="fas fa-sort"></i></th>
+                            <th>Folder</th>
+                            <th width="80" onclick="toggleSort('duration')"><i class="far fa-clock"></i> <i id="sort-duration" class="fas fa-sort"></i></th>
+                        </tr>
+                    </thead>
+                    <tbody id="s-table-body"></tbody>
+                </table>
+            </div>
+        </div>
+        <div id="view-settings" class="view-section">
+            <div style="padding: 40px;">
+                <h1 style="font-size: 32px; font-weight: 800; margin-bottom: 30px;">Settings</h1>
+                <div style="margin-bottom: 35px;">
+                    <label style="display:block; font-weight:700; color:var(--text-sub); font-size:12px; text-transform:uppercase; margin-bottom:15px">Appearances</label>
+                    <div class="theme-picker" id="theme-picker-container"></div>
+                </div>
+                <div style="margin-bottom: 35px;">
+                    <label style="display:block; font-weight:700; color:var(--text-sub); font-size:12px; text-transform:uppercase; margin-bottom:15px">Data Management</label>
+                    <div style="display:flex; gap:10px;">
+                        <button class="btn-sync" style="background:#333; color:white; width:220px" id="btn-export-json"><i class="fas fa-cloud-download-alt"></i> Export Preferences</button>
+                        <button class="btn-sync" style="background:#333; color:white; width:220px" onclick="document.getElementById('config-in').click()"><i class="fas fa-cloud-upload-alt"></i> Import Preferences</button>
+                        <input type="file" id="config-in" accept=".json" style="display:none">
+                    </div>
+                </div>
+                <div style="margin-bottom: 35px;">
+                    <label style="display:block; font-weight:700; color:var(--text-sub); font-size:12px; text-transform:uppercase; margin-bottom:15px"><i class="fas fa-puzzle-piece"></i> Extensions</label>
+                    <div id="ext-manager-container"></div>
+                    <div id="ext-settings-panels" style="margin-top: 20px;"></div>
+                </div>
+                <div style="margin-bottom: 30px;">
+                    <label style="display:block; font-weight:700; color:var(--text-sub); font-size:12px; text-transform:uppercase; margin-bottom:10px">About Developer</label>
+                    <a href="https://github.com/Arcioth" target="_blank" style="color:var(--accent); text-decoration:none; font-weight:700; font-size:18px; display:flex; align-items:center; gap:10px"><i class="fab fa-github"></i> Arcioth on GitHub</a>
+                </div>
+            </div>
+        </div>
+    </main>
+    <aside class="queue-sidebar">
+        <div style="font-weight: 800; font-size: 16px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between;">Queue <i class="fas fa-times" id="q-close" style="cursor:pointer; font-size: 12px; color: var(--text-sub);"></i></div>
+        <div class="queue-section-title">Manual Queue</div>
+        <div id="manual-queue-list"></div>
+        <div class="queue-section-title">Coming Up Next</div>
+        <div id="playlist-queue-list"></div>
+    </aside>
+    <footer class="player-bar">
+        <div class="p-info">
+            <div class="p-art" id="p-art"><i class="fas fa-compact-disc" style="margin: 16px; color: #444; font-size: 24px;"></i></div>
+            <div style="display: flex; flex-direction: column; overflow: hidden; width: 180px;">
+                <span id="p-title" style="font-size: 13px; font-weight: 600; white-space: nowrap; text-overflow: ellipsis; overflow: hidden;">Not Playing</span>
+                <span id="p-meta" style="font-size: 10px; color: var(--text-sub);">Local Collection</span>
+            </div>
+        </div>
+        <div class="p-controls">
+            <div class="ctrl-btns">
+                <button class="sub-btn" id="btn-shuffle" title="Shuffle Mode"><i class="fas fa-random"></i><span class="btn-badge" id="shuffle-badge">ALL</span></button>
+                <button class="sub-btn" id="b-prev"><i class="fas fa-step-backward"></i></button>
+                <button class="play-btn" id="b-play"><i class="fas fa-play"></i></button>
+                <button class="sub-btn" id="b-next"><i class="fas fa-step-forward"></i></button>
+                <button class="sub-btn" id="btn-loop" title="Loop Mode"><i class="fas fa-redo"></i><span class="btn-badge" id="loop-badge">1</span></button>
+            </div>
+            <div class="slider-wrapper">
+                <span id="t-curr">0:00</span>
+                <div class="custom-slider" id="p-slider"><div class="slider-track"><div class="slider-fill" id="p-fill"></div><div class="slider-thumb" id="p-thumb"></div></div></div>
+                <span id="t-total">0:00</span>
+            </div>
+        </div>
+        <div class="p-tools">
+            <i class="fas fa-list-ul queue-toggle" id="q-toggle-player" style="margin-right: 8px; cursor:pointer"></i>
+            <div class="vol-slider-box">
+                <i class="fas fa-volume-up vol-icon" id="btn-mute"></i>
+                <div class="custom-slider" id="v-slider"><div class="slider-track"><div class="slider-fill" id="v-fill" style="width: 70%;"></div><div class="slider-thumb" id="v-thumb" style="left: 70%;"></div></div></div>
+            </div>
+        </div>
+    </footer>
+    <div id="ctx">
+        <div class="ctx-item" id="cx-play"><i class="fas fa-play"></i> Play Now</div>
+        <div class="ctx-item" id="cx-next"><i class="fas fa-level-up-alt"></i> Play After This</div>
+        <div class="ctx-item" id="cx-add"><i class="fas fa-plus"></i> Add to Queue</div>
+        <div class="ctx-item" id="cx-folder-add" style="display:none"><i class="fas fa-folder-plus"></i> Add Folder to Queue</div>
+        <div class="ctx-item" id="cx-clear"><i class="fas fa-trash-alt"></i> Clear Queue</div>
+    </div>
+    <audio id="audio"></audio>
+    <script type="module" src="/src/app.js"></script>
+</body>
+</html>

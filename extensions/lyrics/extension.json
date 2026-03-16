@@ -1,0 +1,14 @@
+{
+    "id": "openify.lyrics",
+    "name": "Lyrics",
+    "version": "1.0.0",
+    "description": "Fetches and displays synced lyrics for the currently playing track via LRCLIB.",
+    "author": "Openify Team",
+    "main": "index.js",
+    "permissions": [
+        "playback:read",
+        "events:subscribe",
+        "ui:sidebar",
+        "storage"
+    ]
+}

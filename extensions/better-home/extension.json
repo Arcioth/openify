@@ -1,0 +1,15 @@
+{
+    "id": "openify.better-home",
+    "name": "Better Home",
+    "version": "1.1.0",
+    "description": "Enhanced home dashboard with recently played, quick picks, top folders, and library stats.",
+    "author": "Openify Team",
+    "main": "index.js",
+    "permissions": [
+        "library:read",
+        "playback:read",
+        "playback:control",
+        "events:subscribe",
+        "storage"
+    ]
+}

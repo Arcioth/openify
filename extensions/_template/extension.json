@@ -1,0 +1,10 @@
+{
+    "id": "your-name.extension-name",
+    "name": "My Extension",
+    "version": "1.0.0",
+    "description": "A short description of what your extension does.",
+    "author": "Your Name",
+    "main": "index.js",
+    "permissions": [],
+    "requires": []
+}

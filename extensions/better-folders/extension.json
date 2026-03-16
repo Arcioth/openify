@@ -1,0 +1,15 @@
+{
+    "id": "openify.better-folders",
+    "name": "Better Folders",
+    "version": "1.0.0",
+    "description": "Enhanced folder browser with artwork grids, durations, and quick-play controls.",
+    "author": "Openify Team",
+    "main": "index.js",
+    "permissions": [
+        "library:read",
+        "playback:read",
+        "playback:control",
+        "events:subscribe",
+        "ui:sidebar"
+    ]
+}

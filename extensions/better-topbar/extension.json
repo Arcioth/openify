@@ -1,0 +1,15 @@
+{
+    "id": "openify.better-topbar",
+    "name": "Better Top Bar",
+    "version": "1.0.0",
+    "description": "Enhanced top bar with improved search, inline queue preview, and an account/stats dropdown.",
+    "author": "Openify Team",
+    "main": "index.js",
+    "permissions": [
+        "library:read",
+        "playback:read",
+        "playback:control",
+        "events:subscribe",
+        "storage"
+    ]
+}

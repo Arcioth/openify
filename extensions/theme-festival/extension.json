@@ -1,0 +1,11 @@
+{
+    "id": "openify.theme-festival",
+    "name": "Theme Festival",
+    "version": "1.0.0",
+    "description": "A collection of vibrant and unique themes: Sakura, Ocean Deep, Retrowave, Forest, Sunset Beach, Lavender Dream, Volcano, Arctic, and Candy Pop.",
+    "author": "Openify Team",
+    "main": "index.js",
+    "permissions": [
+        "themes:register"
+    ]
+}

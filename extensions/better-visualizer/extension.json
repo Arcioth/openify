@@ -1,0 +1,18 @@
+{
+    "id": "openify.better-visualizer",
+    "name": "Better Visualizer",
+    "version": "1.0.0",
+    "description": "Enhanced visualizer: mini player-bar visualizer, plus Snow, Flame, Runner, Boulder, and Bicycle modes.",
+    "author": "Openify Team",
+    "main": "index.js",
+    "permissions": [
+        "playback:read",
+        "events:subscribe",
+        "ui:sidebar",
+        "ui:playerWidget",
+        "storage"
+    ],
+    "requires": [
+        "openify.visualizer"
+    ]
+}

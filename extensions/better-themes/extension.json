@@ -1,0 +1,11 @@
+{
+    "id": "openify.better-themes",
+    "name": "Better Themes",
+    "version": "1.0.0",
+    "description": "Enhanced theme picker with categorized lists, search, and live preview.",
+    "author": "Openify Team",
+    "main": "index.js",
+    "permissions": [
+        "events:subscribe"
+    ]
+}

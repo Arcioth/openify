@@ -1,0 +1,11 @@
+{
+    "id": "openify.sample-neon-theme",
+    "name": "Neon Theme Pack",
+    "version": "1.0.0",
+    "description": "Adds Neon Pink and Neon Cyan themes to Openify.",
+    "author": "Openify Team",
+    "main": "index.js",
+    "permissions": [
+        "themes:register"
+    ]
+}

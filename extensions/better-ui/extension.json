@@ -1,0 +1,12 @@
+{
+    "id": "openify.better-ui",
+    "name": "Better UI",
+    "version": "1.0.0",
+    "description": "Visual polish: smoother animations, better scrollbars, refined player bar, improved context menu, and subtle glow effects.",
+    "author": "Openify Team",
+    "main": "index.js",
+    "permissions": [
+        "events:subscribe",
+        "playback:read"
+    ]
+}

@@ -1,0 +1,17 @@
+{
+  "name": "openify",
+  "version": "2.0.0",
+  "description": "Openify - Pro Music Player",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "keywords": [],
+  "author": "Arcioth",
+  "license": "ISC",
+  "devDependencies": {
+    "vite": "^7.3.1"
+  }
+}

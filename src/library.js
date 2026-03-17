@@ -102,30 +102,47 @@ async function scanMetadataSequentially() {
             events.emit('metadataUpdate', i);
             continue;
         }
-        const mediaSource = s.file || s.assetUrl;
         const audioSrc = s.file ? URL.createObjectURL(s.file) : s.assetUrl;
-        await new Promise((resolve) => {
-            jsmediatags.read(mediaSource, {
-                onSuccess: (t) => {
-                    if (t.tags.picture) {
-                        let d = '';
-                        for (let j = 0; j < t.tags.picture.data.length; j++) d += String.fromCharCode(t.tags.picture.data[j]);
-                        s.artwork = `data:${t.tags.picture.format};base64,${window.btoa(d)}`;
-                    }
-                    const aud = new Audio();
-                    aud.src = audioSrc;
-                    aud.onloadedmetadata = () => {
-                        s.durSec = aud.duration;
-                        s.duration = format(aud.duration);
-                        saveToDB('meta', s.filename, { duration: s.duration, durSec: s.durSec, artwork: s.artwork });
-                        events.emit('metadataUpdate', i);
-                        if (s.file) URL.revokeObjectURL(aud.src);
-                        resolve();
-                    };
-                    aud.onerror = () => resolve();
-                },
-                onError: () => resolve()
+
+        // jsmediatags can read File objects and http(s) URLs but not asset:// URLs
+        // For Tauri-loaded files (no File object), get duration from Audio element only
+        if (s.file) {
+            await new Promise((resolve) => {
+                jsmediatags.read(s.file, {
+                    onSuccess: (t) => {
+                        if (t.tags.picture) {
+                            let d = '';
+                            for (let j = 0; j < t.tags.picture.data.length; j++) d += String.fromCharCode(t.tags.picture.data[j]);
+                            s.artwork = `data:${t.tags.picture.format};base64,${window.btoa(d)}`;
+                        }
+                        const aud = new Audio();
+                        aud.src = audioSrc;
+                        aud.onloadedmetadata = () => {
+                            s.durSec = aud.duration;
+                            s.duration = format(aud.duration);
+                            saveToDB('meta', s.filename, { duration: s.duration, durSec: s.durSec, artwork: s.artwork });
+                            events.emit('metadataUpdate', i);
+                            URL.revokeObjectURL(aud.src);
+                            resolve();
+                        };
+                        aud.onerror = () => resolve();
+                    },
+                    onError: () => resolve()
+                });
             });
-        });
+        } else if (audioSrc) {
+            await new Promise((resolve) => {
+                const aud = new Audio();
+                aud.src = audioSrc;
+                aud.onloadedmetadata = () => {
+                    s.durSec = aud.duration;
+                    s.duration = format(aud.duration);
+                    saveToDB('meta', s.filename, { duration: s.duration, durSec: s.durSec, artwork: s.artwork });
+                    events.emit('metadataUpdate', i);
+                    resolve();
+                };
+                aud.onerror = () => resolve();
+            });
+        }
     }
 }

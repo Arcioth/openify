@@ -1,71 +1,78 @@
 # CLAUDE.md
 
-This file provides guidance for development in this repository.
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ## Build & Dev Commands
 
 ```bash
-npm install        # Install Node and Tauri dependencies
-npm run tauri dev  # Start desktop app (re-optimized with Wayland fix)
-npm run tauri build # Build production binaries
-npm run dev        # Optional: Start standalone Vite server (browser-only)
+npm install          # Install Node and Tauri dependencies
+npm run tauri dev    # Start desktop app (Vite dev server + Tauri window)
+npm run tauri build  # Build production binaries (.deb, .rpm)
+npm run dev          # Standalone Vite server (browser-only, no Tauri)
 ```
 
 No test runner or linter is configured.
 
 ## Architecture
 
-Openify is a **Tauri-powered** desktop music player. It uses a **Rust** backend for native windowing and a **Vanilla JS** frontend for the UI. It features a custom plugin/extension architecture.
+Openify is a **Tauri v2** desktop music player: **Rust** backend (native windowing, system commands) + **Vanilla JS** frontend (zero frameworks, direct DOM).
 
-### Core App Flow
+### Core Flow
 
-`index.html` → `src/app.js` (entry point) → initializes modules:
-1. Audio engine (`src/audio.js`) — wraps `<audio>` element.
-2. UI modules (`src/ui/*.js`) — player, views, themes, search, queue, playlists, settings.
-3. IndexedDB (`src/db.js`) + localStorage config (`src/config.js`).
-4. Extension manager (`src/extensions/manager.js`) — discovers, loads, and enables extensions.
+`index.html` → `src/app.js` → initializes:
+1. Audio engine (`src/audio.js`) — wraps `<audio>` element
+2. UI modules (`src/ui/*.js`) — player, views, themes, search, queue, playlists, settings
+3. IndexedDB (`src/db.js`) + localStorage config (`src/config.js`)
+4. Extension manager (`src/extensions/manager.js`)
 
-### Desktop Wrapper (`src-tauri/`)
+### Dual Mode: Tauri vs Browser
 
-Tauri handles the native window and provides system APIs.
-- **Wayland Fix**: `src-tauri/src/main.rs` sets `WEBKIT_DISABLE_COMPOSITING_MODE=1` to prevent crashes on some Linux/Wayland environments (including Arch).
+The app detects `window.__TAURI__` (`withGlobalTauri: true` in config) and switches behavior:
+- **Folder loading**: Tauri uses native dialog + `scan_music_dir` Rust command + asset protocol. Browser uses `<input webkitdirectory>`.
+- **yt-dlp**: Tauri uses `ytdlp_search`/`ytdlp_stream` Rust commands + direct URLs. Browser uses Vite middleware proxy.
+- **Audio playback**: Tauri uses asset protocol URLs (`convertFileSrc`). Browser uses `URL.createObjectURL`.
+- **Metadata**: Browser mode uses `jsmediatags` for ID3 tags. Tauri mode gets duration from Audio element only (jsmediatags can't XHR asset:// URLs).
 
-### State & Events
+### Rust Backend (`src-tauri/src/lib.rs`)
 
-- **`src/state.js`**: Central `state` object. Directly imported by modules.
-- **`src/events.js`**: Pub/sub EventBus for cross-module communication.
+Three Tauri commands:
+- `scan_music_dir(dir)` — recursively finds audio files, returns `{path, filename, folder}[]`
+- `ytdlp_search(query)` — runs `yt-dlp ytsearch10:<query>`, returns raw stdout
+- `ytdlp_stream(video_id)` — runs `yt-dlp -f bestaudio -j`, returns stream JSON
+
+Plugins: `tauri-plugin-dialog` (native file picker), `tauri-plugin-log` (debug only).
+
+### Audio Playback on Linux
+
+WebKitGTK uses GStreamer for media decoding. Required system packages: `gst-plugins-good`, `gst-plugins-bad`. Without these, **no audio will play** in Tauri even though the same page works in a browser.
 
 ### Extension System (`src/extensions/`)
 
-Extensions are modular and use a permission-gated API.
-- **Lifecycle**: discover → validate manifest → topological sort → enable (`init(api)`) → disable.
-- **Key files**: `manager.js` (orchestrator), `api.js` (factory), `ui-registry.js` (UI injection points), `loader.js` (dynamic module loading).
+- **Lifecycle**: discover → validate manifest → topological sort → enable (`init(api)`) → disable
+- **Default state**: All disabled on fresh install (config version gated in `manager.js`)
+- **Key files**: `manager.js` (orchestrator), `api.js` (permission-gated API factory), `ui-registry.js` (UI injection), `loader.js` (dynamic module loading)
+- Extensions live in `extensions/<name>/` with `extension.json` manifest
+- 17 bundled extensions registered in `bundledExtensions` array in `manager.js`
 
-### yt-dlp Extension & Backend
+### State & Events
 
-YouTube music streaming.
-- **Backend Proxy**: `vite.config.js` includes a proxy and yt-dlp integration.
-- **yt-dlp**: Required on the system or in the local `bin/` directory.
-
-### Persistence
-
-- **localStorage**: User preferences (volume, theme, etc.) and extension statuses.
-- **IndexedDB**: Song metadata caching and per-extension storage.
+- `src/state.js` — single mutable `state` object, directly imported
+- `src/events.js` — pub/sub EventBus (`trackChange`, `libraryLoaded`, `metadataUpdate`, etc.)
 
 ### Theming
 
-Managed through `styles/main.css` and dynamic injection via `theme-registry.js`. 25+ themes available.
+`styles/main.css` defines 25+ built-in themes via CSS variables on `[data-theme]`. Extensions register additional themes via `theme-registry.js`.
 
 ## Development Conventions
 
-- Avoid frameworks; use direct DOM manipulation in vanilla JS.
-- Extension IDs use `openify.` prefix.
-- All dependencies (FontAwesome, jsmediatags, fonts) are vendored in `public/`.
-- Use unique CSS prefixes for extensions to avoid style collisions.
+- Vanilla JS only. No frameworks. Direct DOM manipulation.
+- Extension IDs use `openify.` prefix. CSS classes use unique prefixes (e.g., `ytdlp-`).
+- Dependencies (FontAwesome, jsmediatags, fonts) vendored in `public/`.
+- Wayland fix in `main.rs`: sets `WEBKIT_DISABLE_COMPOSITING_MODE=1`.
 
 ## Version Management (UPDATE ON EVERY RELEASE)
 
-The version must be kept in sync across all of these files:
+Sync version across all three files:
 
 | File | Field |
 |------|-------|
@@ -73,22 +80,26 @@ The version must be kept in sync across all of these files:
 | `src-tauri/tauri.conf.json` | `"version"` |
 | `src-tauri/Cargo.toml` | `version` under `[package]` |
 
-Current version: **2.0.0**
+Also bump `CONFIG_VERSION` in `src/extensions/manager.js` to reset extension state on upgrade.
 
-When bumping a version:
-1. Update all three files above to the same version string.
-2. Ensure `packaging/PKGBUILD` `pkgver()` will resolve correctly from git tags (tag format: `v2.0.0`).
-3. If the Flatpak manifest pins a yt-dlp version, verify it's still current.
-4. Back up the pre-release state to `~/Documents/musicplayer/old_versions/` before major changes.
+Current version: **2.0.0**
 
 ## Release Checklist
 
-Before publishing a release build:
-- [ ] All version strings synced (see above).
-- [ ] `src-tauri/tauri.conf.json` identifier is `com.arcioth.openify` (NOT `com.tauri.dev`).
-- [ ] `LICENSE` file exists in repo root.
-- [ ] `packaging/openify.desktop` has `Terminal=false`.
-- [ ] Flatpak `sha256` is pinned (not `SKIP` or `FIXME`).
-- [ ] `bin/yt-dlp` is NOT committed (listed in `.gitignore`).
-- [ ] No `console.log()` debug statements in `src/`.
-- [ ] Run `npm run tauri build` and verify the binary launches correctly.
+- [ ] All version strings synced (see above)
+- [ ] `tauri.conf.json` identifier is `com.arcioth.openify`
+- [ ] `LICENSE` file exists
+- [ ] `packaging/openify.desktop` has `Terminal=false`
+- [ ] Flatpak `sha256` is pinned (not `SKIP` or `FIXME`)
+- [ ] `bin/yt-dlp` NOT committed (in `.gitignore`)
+- [ ] No `console.log()` debug statements in `src/`
+- [ ] `npm run tauri build` succeeds and binary plays audio
+- [ ] Back up pre-release state to `~/Documents/musicplayer/old_versions/`
+
+## Packaging
+
+- **AUR**: `packaging/PKGBUILD` → published as `openify-git`
+- **Flatpak**: `packaging/flatpak/com.arcioth.openify.yaml`
+- **Desktop entry**: `packaging/openify.desktop`
+- AUR repo: `ssh://aur@aur.archlinux.org/openify-git.git` (local clone at `~/openify-git/`)
+- GitHub: `https://github.com/Arcioth/openify` branch `v2.0`

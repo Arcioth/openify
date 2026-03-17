@@ -9,11 +9,20 @@ import { events } from '../events.js';
 const extensions = new Map();
 const CONFIG_KEY = 'openify_extensions';
 
+const CONFIG_VERSION = '2.0.0';
+
 function loadExtensionConfig() {
     try {
-        return JSON.parse(localStorage.getItem(CONFIG_KEY)) || {};
+        const config = JSON.parse(localStorage.getItem(CONFIG_KEY)) || {};
+        if (config._version !== CONFIG_VERSION) {
+            // Reset on version change so extensions default to disabled
+            const fresh = { _version: CONFIG_VERSION };
+            saveExtensionConfig(fresh);
+            return fresh;
+        }
+        return config;
     } catch {
-        return {};
+        return { _version: CONFIG_VERSION };
     }
 }
 
@@ -30,7 +39,7 @@ export async function initExtensionManager() {
     const enableOrder = getEnableOrder();
 
     for (const id of enableOrder) {
-        if (config[id]?.enabled !== false) {
+        if (config[id]?.enabled === true) {
             await enableExtension(id);
         }
     }

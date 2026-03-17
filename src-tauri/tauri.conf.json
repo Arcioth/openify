@@ -23,8 +23,7 @@
     "security": {
       "csp": "default-src 'self'; script-src 'self' blob:; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https: asset: http://asset.localhost; media-src 'self' blob: https: asset: http://asset.localhost; connect-src 'self' https: http: ipc:; font-src 'self' data:",
       "assetProtocol": {
-        "enable": true,
-        "scope": ["**"]
+        "scope": ["/**", "$HOME/**", "$APPDATA/**"]
       }
     }
   },

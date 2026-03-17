@@ -34,6 +34,40 @@ module.exports = {
             }
         });
 
+        api.themes.registerTheme({
+            id: 'twin',
+            label: 'Twin',
+            color: '#b48eff',
+            cssVariables: {
+                '--bg-base': '#0a0612',
+                '--bg-sidebar': '#0e0818',
+                '--bg-main': '#110a1e',
+                '--bg-card': '#1a1030',
+                '--bg-card-hover': '#251845',
+                '--text-main': '#e0d0ff',
+                '--text-sub': '#8a70b0',
+                '--accent': '#b48eff',
+                '--accent-hover': '#c9a8ff',
+            }
+        });
+
+        api.themes.registerTheme({
+            id: 'vegza',
+            label: 'Vegza',
+            color: '#7cff6b',
+            cssVariables: {
+                '--bg-base': '#060d05',
+                '--bg-sidebar': '#081008',
+                '--bg-main': '#0a140a',
+                '--bg-card': '#122012',
+                '--bg-card-hover': '#1a3018',
+                '--text-main': '#d0ffc8',
+                '--text-sub': '#6a9a60',
+                '--accent': '#7cff6b',
+                '--accent-hover': '#a0ff90',
+            }
+        });
+
         return module.exports;
     },
 

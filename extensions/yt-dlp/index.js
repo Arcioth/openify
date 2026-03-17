@@ -4,6 +4,7 @@ var results = [];
 var searching = false;
 var searchError = null;
 var searchTimeout = null;
+var isTauri = !!(window.__TAURI__ && window.__TAURI__.core);
 
 module.exports = {
     init(_api) {
@@ -74,13 +75,21 @@ async function searchYouTube(query) {
     render();
 
     try {
-        var resp = await fetch('/yt-api/search?q=' + encodeURIComponent(query));
-        if (!resp.ok) throw new Error('Search failed (status ' + resp.status + ')');
-        var data = await resp.json();
-        if (data.error) throw new Error(data.error);
+        var items;
+
+        if (isTauri) {
+            var stdout = await window.__TAURI__.core.invoke('ytdlp_search', { query: query });
+            items = stdout.trim().split('\n').filter(Boolean).map(function(line) { return JSON.parse(line); });
+        } else {
+            var resp = await fetch('/yt-api/search?q=' + encodeURIComponent(query));
+            if (!resp.ok) throw new Error('Search failed (status ' + resp.status + ')');
+            var data = await resp.json();
+            if (data.error) throw new Error(data.error);
+            items = data.items || [];
+        }
 
         // yt-dlp flat-playlist items have: id, title, duration, channel, thumbnails[]
-        results = (data.items || []).filter(function(item) {
+        results = items.filter(function(item) {
             return item.duration > 0;
         }).map(function(item) {
             var thumb = '';
@@ -117,16 +126,25 @@ async function playVideo(item, btnEl) {
     }
 
     try {
-        var resp = await fetch('/yt-api/streams/' + videoId);
-        if (!resp.ok) {
-            var errData = await resp.json().catch(function() { return {}; });
-            throw new Error(errData.error || 'Failed to get stream');
+        var data;
+
+        if (isTauri) {
+            var stdout = await window.__TAURI__.core.invoke('ytdlp_stream', { videoId: videoId });
+            data = JSON.parse(stdout.trim());
+        } else {
+            var resp = await fetch('/yt-api/streams/' + videoId);
+            if (!resp.ok) {
+                var errData = await resp.json().catch(function() { return {}; });
+                throw new Error(errData.error || 'Failed to get stream');
+            }
+            data = await resp.json();
         }
+
         // yt-dlp -f bestaudio -j returns: url (direct stream), title, duration, thumbnail, uploader
-        var data = await resp.json();
         if (!data.url) throw new Error('No stream URL in response');
 
-        var proxiedUrl = '/yt-api/proxy?url=' + encodeURIComponent(data.url);
+        // In Tauri, use the direct URL (webview handles CORS); in browser, proxy it
+        var streamUrl = isTauri ? data.url : '/yt-api/proxy?url=' + encodeURIComponent(data.url);
 
         // Check if already in library
         var songs = api.library.getSongs();
@@ -139,7 +157,7 @@ async function playVideo(item, btnEl) {
         }
 
         if (existingIdx !== -1) {
-            api.library.updateSong(existingIdx, { assetUrl: proxiedUrl });
+            api.library.updateSong(existingIdx, { assetUrl: streamUrl });
             api.playback.play(existingIdx);
         } else {
             var idx = api.library.addSongs([{
@@ -149,7 +167,7 @@ async function playVideo(item, btnEl) {
                 duration: formatDuration(data.duration || item.duration),
                 durSec: data.duration || item.duration || 0,
                 artwork: data.thumbnail || item.thumbnail || null,
-                assetUrl: proxiedUrl
+                assetUrl: streamUrl
             }]);
             api.playback.play(idx);
         }
@@ -278,7 +296,7 @@ function renderSettings(el) {
     el.innerHTML = '<div style="padding:16px">' +
         '<div style="font-size:13px; font-weight:600; color:var(--text-main); margin-bottom:12px">YouTube Music</div>' +
         '<div style="font-size:12px; color:var(--text-sub); line-height:1.6">' +
-        'Uses <strong style="color:var(--text-main)">yt-dlp</strong> running locally on the dev server to search and stream YouTube audio. ' +
+        'Uses <strong style="color:var(--text-main)">yt-dlp</strong> to search and stream YouTube audio. ' +
         'Requires <code>yt-dlp</code> installed on your system.' +
         '</div>' +
         '<button id="ytdlp-check-btn" style="margin-top:12px; padding:6px 16px; background:var(--accent); ' +
@@ -290,10 +308,23 @@ function renderSettings(el) {
         var resultEl = el.querySelector('#ytdlp-check-result');
         resultEl.textContent = 'Testing...';
         resultEl.style.color = 'var(--text-sub)';
-        fetch('/yt-api/search?q=test').then(function(r) {
-            return r.json();
-        }).then(function(data) {
-            if (data.error) throw new Error(data.error);
+
+        var testPromise;
+        if (isTauri) {
+            testPromise = window.__TAURI__.core.invoke('ytdlp_search', { query: 'test' }).then(function(stdout) {
+                var items = stdout.trim().split('\n').filter(Boolean);
+                return { items: items };
+            });
+        } else {
+            testPromise = fetch('/yt-api/search?q=test').then(function(r) {
+                return r.json();
+            }).then(function(data) {
+                if (data.error) throw new Error(data.error);
+                return data;
+            });
+        }
+
+        testPromise.then(function(data) {
             resultEl.style.color = 'var(--accent)';
             resultEl.textContent = 'yt-dlp is working! Found ' + (data.items || []).length + ' results.';
         }).catch(function(e) {

@@ -1,7 +1,7 @@
 import { state } from './state.js';
 import { initDB } from './db.js';
 import { loadConfig } from './config.js';
-import { loadFromFiles } from './library.js';
+import { loadFromFiles, loadFromPaths } from './library.js';
 import { initAudio, getAudio } from './audio.js';
 import { initPlayer, updateLoopUI, updateShuffleUI } from './ui/player.js';
 import { initViews, switchView, setViewMode, toggleSort } from './ui/views.js';
@@ -50,12 +50,26 @@ initPlaylists();
 initSettings();
 initShortcuts();
 
-// Library loading — browser file picker only
+// Library loading — Tauri native dialog or browser fallback
 const btnLoad = document.getElementById('btn-load-library');
 const fFallback = document.getElementById('f-fallback');
+const isTauri = !!(window.__TAURI__ && window.__TAURI__.core);
 
-btnLoad.onclick = () => fFallback.click();
-fFallback.onchange = (e) => loadFromFiles(e.target.files);
+if (isTauri) {
+    btnLoad.onclick = async () => {
+        try {
+            const dir = await window.__TAURI__.dialog.open({ directory: true, title: 'Select Music Folder' });
+            if (!dir) return;
+            const files = await window.__TAURI__.core.invoke('scan_music_dir', { dir });
+            loadFromPaths(files);
+        } catch (e) {
+            console.error('Failed to open folder:', e);
+        }
+    };
+} else {
+    btnLoad.onclick = () => fFallback.click();
+    fFallback.onchange = (e) => loadFromFiles(e.target.files);
+}
 
 // Init DB and load config
 initDB().then(async () => {

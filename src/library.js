@@ -40,6 +40,32 @@ export function updateSong(idx, updates) {
     }
 }
 
+export function loadFromPaths(audioFiles) {
+    state.allSongs = [];
+    state.playlists = { 'All Songs': [] };
+    audioFiles.forEach((file, index) => {
+        const assetUrl = window.__TAURI__.core.convertFileSrc(file.path);
+        const song = {
+            file: null,
+            folder: file.folder,
+            title: file.filename.replace(/\.[^/.]+$/, '').replace(/\[.*?\]/g, '').trim(),
+            filename: file.filename,
+            duration: '--:--',
+            durSec: 0,
+            artwork: null,
+            assetUrl,
+            localPath: file.path,
+            id: index + 1
+        };
+        state.allSongs.push(song);
+        if (!state.playlists[file.folder]) state.playlists[file.folder] = [];
+        state.playlists[file.folder].push(song);
+        state.playlists['All Songs'].push(song);
+    });
+    events.emit('libraryLoaded');
+    scanMetadataSequentially();
+}
+
 export function loadFromFiles(files) {
     const audioFiles = Array.from(files).filter(f =>
         f.type.startsWith('audio/') || f.name.match(/\.(mp3|wav|ogg|flac|m4a)$/i)
@@ -76,9 +102,10 @@ async function scanMetadataSequentially() {
             events.emit('metadataUpdate', i);
             continue;
         }
-        const fetchFile = URL.createObjectURL(s.file);
+        const mediaSource = s.file || s.assetUrl;
+        const audioSrc = s.file ? URL.createObjectURL(s.file) : s.assetUrl;
         await new Promise((resolve) => {
-            jsmediatags.read(s.file, {
+            jsmediatags.read(mediaSource, {
                 onSuccess: (t) => {
                     if (t.tags.picture) {
                         let d = '';
@@ -86,13 +113,13 @@ async function scanMetadataSequentially() {
                         s.artwork = `data:${t.tags.picture.format};base64,${window.btoa(d)}`;
                     }
                     const aud = new Audio();
-                    aud.src = fetchFile;
+                    aud.src = audioSrc;
                     aud.onloadedmetadata = () => {
                         s.durSec = aud.duration;
                         s.duration = format(aud.duration);
                         saveToDB('meta', s.filename, { duration: s.duration, durSec: s.durSec, artwork: s.artwork });
                         events.emit('metadataUpdate', i);
-                        URL.revokeObjectURL(aud.src);
+                        if (s.file) URL.revokeObjectURL(aud.src);
                         resolve();
                     };
                     aud.onerror = () => resolve();

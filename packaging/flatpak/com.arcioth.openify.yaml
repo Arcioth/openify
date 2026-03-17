@@ -13,8 +13,8 @@ modules:
       - install -D yt-dlp /app/bin/yt-dlp
     sources:
       - type: file
-        url: https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp
-        sha256: SKIP # Replace with actual hash for production
+        url: https://github.com/yt-dlp/yt-dlp/releases/download/2025.03.31/yt-dlp
+        sha256: 0e8bc5558efce5ae2a6397710eed72fd8d434e45904e4fe029dd21c610a95d4d
   - name: openify
     buildsystem: simple
     build-options:

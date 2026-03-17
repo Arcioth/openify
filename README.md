@@ -45,13 +45,14 @@ Openify is a privacy-first music player that reads audio files directly from you
 ## Dependencies & Requirements
 
 ### Runtime Dependencies
-- **yt-dlp**: Required for YouTube Music features.
-- **WebView2** (Windows) / **WebKit2GTK** (Linux): Required for the desktop app.
+- **WebView2** (Windows) / **WebKit2GTK 4.1** (Linux): Required for the desktop app.
+- **GStreamer plugins** (Linux): `gst-plugins-good` and `gst-plugins-bad` — required for audio playback in the WebView. Without these, **no audio will play**.
+- **yt-dlp** (optional): Required for YouTube Music streaming features.
 
 ### Build Dependencies (Developers)
 - **Node.js** (v18+)
-- **Rust** (v1.70+)
-- **Linux only**: `webkit2gtk`, `gtk3`, `libappindicator-gtk3`, `pkg-config`, `base-devel`.
+- **Rust** (v1.77+)
+- **Linux only**: `webkit2gtk-4.1`, `gtk3`, `pkg-config`, `base-devel`.
 
 ---
 
